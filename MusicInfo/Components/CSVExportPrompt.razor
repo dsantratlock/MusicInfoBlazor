@@ -1,0 +1,21 @@
+﻿@using MusicInfo.Models
+@inject IJSRuntime JS;
+
+<button @onclick="GenerateCSV" class="inline-flex items-center mx-1 focus:outline-none bg-blue-300 hover:bg-blue-100 py-2 px-2 rounded-sm shadow-md text-blue-900 font-sans">
+    Export as CSV
+</button>
+
+@code {
+
+    [Parameter]
+    public List<TrackData>? Data { get; set; }
+
+    private string csv;
+
+    public async Task GenerateCSV()
+    {
+        csv = "ArtistName,ReleaseDate";
+        csv += Environment.NewLine + string.Join(Environment.NewLine, Data.Select(d => $"{d.ArtistName},{d.ReleaseDate.ToString("MM-dd-yyyy")},"));
+        await JS.InvokeAsync<bool>("downloadFile", csv, "ReleaseData.csv", "text/csv;charset=utf-8;");
+    }
+}

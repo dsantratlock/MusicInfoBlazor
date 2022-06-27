@@ -1,0 +1,59 @@
+﻿@using MusicInfo.Models
+@using MusicInfo.Services
+@inject IJSRuntime JS;
+
+
+<audio id="@ElementId" src="@AudioUrl" @onended="AudioEnded"></audio>
+<div class="space-x-1"> 
+    <button class="focus:outline-none bg-blue-300 hover:bg-blue-100 py-2 px-2 rounded-sm shadow-md text-blue-900 font-sans" 
+    @onclick="() =>SetPlayStatus(false)" disabled=@DisablePlay>@PlayStatusDispaly</button> 
+</div>
+
+@code {
+
+    [Inject] AudioStatusService? AudioStatusService { get; set; }
+
+    [Parameter]
+    public EventCallback<AudioPlayer> OnVolumeChanged {get; set;}
+
+    [Parameter]
+    public EventCallback<AudioPlayer> PlayStateChanged {get; set;}
+
+    [Parameter]
+    public string? AudioUrl { get; set; }
+
+    [Parameter]
+    public string ElementId { get; set; } = "";
+
+    [Parameter]
+    public bool DisablePlay { get; set; }
+
+    [Parameter]
+    public string? PlayStatusDispaly { get; set; } = "Play";
+
+    [Parameter]
+    public bool PagePlayer { get; set; }
+
+    private bool playing;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (AudioStatusService!.CurrentPlayer != null && ElementId == AudioStatusService.CurrentPlayer.ElementId)
+        {
+            PlayStatusDispaly =  AudioStatusService.CurrentPlayer != null && AudioStatusService.CurrentPlayer.playing ? "Pause" : "Play";
+        }
+    }
+
+    private async Task SetPlayStatus(bool audioEnded)
+    {
+        string currentlyPlayingId = AudioStatusService!.CurrentPlayer?.ElementId ?? "";
+        AudioStatusService!.SetCurrentPlayer(await JS.InvokeAsync<bool>("setPlayStatus", ElementId, AudioStatusService!.Volume, currentlyPlayingId, PagePlayer, audioEnded), audioEnded, this);
+        PlayStatusDispaly = AudioStatusService!.PlayingStatus;
+        await PlayStateChanged.InvokeAsync();
+    }
+
+    private async Task AudioEnded(EventArgs eventArgs)
+    {
+        await SetPlayStatus(true);
+    }
+}

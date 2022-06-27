@@ -1,0 +1,13 @@
+﻿ <header class="py-3 bg-gray-700 text-center">
+    <h1 class="block font-medium text-white">Songs</h1>
+    <div class="mt-1.5">
+        @ChildContent
+    </div>
+</header>
+
+@code {
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+}

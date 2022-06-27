@@ -1,0 +1,25 @@
+﻿@using MusicInfo.Models
+@using MusicInfo.Services
+@inject IJSRuntime JS;
+
+<label for="volumeSlider" class="block text-base font-medium text-gray-300">Volume</label>
+<input type="range" id="volumeSlider" value=@sliderValue @oninput="SetVolume"/>
+
+@code {
+
+    [Inject] AudioStatusService? AudioStatusService { get; set; }
+
+    [Parameter]
+    public EventCallback<AudioPlayer> OnAudioStatusChanged {get; set;}
+
+    private double? sliderValue { get; set; }
+
+    protected override void OnInitialized() => sliderValue = AudioStatusService!.Volume * 100;
+
+    private async Task SetVolume()
+    {
+        string playerId = AudioStatusService?.CurrentPlayer?.ElementId ?? "";
+        AudioStatusService!.SetVolume( await JS.InvokeAsync<double>("volumeChanged", playerId, "volumeSlider"));
+        await OnAudioStatusChanged.InvokeAsync();
+    }
+}

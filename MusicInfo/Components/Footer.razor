@@ -1,0 +1,16 @@
+﻿@if (ChildContent is not null)
+{
+    <footer class="py-5 bg-gray-700 text-center text-white">
+        @ChildContent
+    </footer>
+}
+
+@code {
+
+    [Parameter]
+    public EventCallback<AudioPlayer> OnAudioStatusChanged {get; set;}
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+}

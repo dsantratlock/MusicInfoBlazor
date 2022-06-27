@@ -1,0 +1,30 @@
+﻿@typeparam TItem where TItem : class, new()
+
+    @if (Data != null && Data.Count > 0)
+    {
+        <ul class="grid grid-cols-2 gap-8 sm:grid-cols-2 md:grid-cols-3">
+            @foreach (var entry in Data)
+            {
+                 <li class="col-span-1 p-8 bg-blue-50 rounded-lg shadow text-center @onHover">
+                    @if(CardContent is not null)
+                        @CardContent(entry)
+                </li>
+            }
+        </ul>
+    }
+
+@code {
+    [Parameter]
+    public List<TItem>? Data { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem>? CardContent { get; set; }
+
+    [Parameter]
+    public bool EnableOnHover { get; set;  }
+
+    private string? onHover;
+
+    
+    protected override void OnInitialized() =>  onHover = EnableOnHover ? "hover:animate-[wiggle_1s_ease-in-out_infinite]" : "";
+}

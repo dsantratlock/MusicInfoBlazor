@@ -1,0 +1,89 @@
+﻿@using MusicInfo.Models
+@inject IJSRuntime JSRuntime
+ 
+<canvas id="@ElementId"></canvas>
+ 
+@code {
+
+    [Parameter]
+    public string? ElementId { get; set; }
+
+    [Parameter]
+    public string? GraphLabel { get; set; }
+
+    [Parameter]
+    public List<TrackData>? Data { get; set; }
+
+    [Parameter]
+    public string[]? BackgroundColor { get; set; }
+
+    [Parameter]
+    public List<string>? Labels { get; set; }
+
+    [Parameter]
+    public string DataSetRequested { get; set; } = "artist";
+
+
+    private List<int> releaseCounts = new List<int>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) 
+    {
+        SetGraphData(DataSetRequested);
+        await JSRuntime.InvokeVoidAsync("destroyHistogram", ElementId);
+        var config = new
+        {
+            Type = "bar",
+            Options = new {
+                Responsive = false,
+                Scales = new {
+                    y = new {
+                        Ticks = new {
+                            BeginAtZero = true,
+                            Max = releaseCounts.Max()
+                        }
+                    },
+                    x = new {
+                        BarPercentage = 1.0,
+                        CategoryPercentage = 1.0
+                    }
+                }
+            },
+            Data = new {
+                Datasets = new[] {
+                    new { 
+                        Data = releaseCounts, 
+                        BackgroundColor = new[]{"blue"}, 
+                        Label=GraphLabel
+                    }
+                },
+                Labels = Labels
+            }
+        };
+        await JSRuntime.InvokeVoidAsync("generateHistogram", ElementId, config);
+    }
+
+    public void SetGraphData(string bucket)
+    {
+        if (bucket == "artist")
+        {
+            Labels = Data!.OrderBy(x => x.ArtistName).Select(x => x.ArtistName).Distinct().ToList();
+            var groupedReleases = Data!.OrderBy(x => x.ArtistName).GroupBy(x => x.ArtistName);
+
+            foreach(var group in groupedReleases)
+            {
+                releaseCounts.Add(group.Count());
+            }
+        }
+
+        if (bucket == "year")
+        {
+            Labels = Data!.OrderBy(x => x.ReleaseDate).Select(x => x.ReleaseDate.ToString("yyyy")).Distinct().ToList();
+            var groupedReleases = Data!.OrderBy(x => x.ReleaseDate).GroupBy(x => x.ReleaseDate.Year);
+            
+            foreach(var group in groupedReleases)
+            {
+                releaseCounts.Add(group.Count());
+            }
+        }
+    }
+}

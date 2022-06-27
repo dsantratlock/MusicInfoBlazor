@@ -1,0 +1,94 @@
+﻿@page "/"
+@using MusicInfo.Components
+@using MusicInfo.Models
+
+<PageTitle>Music Info</PageTitle>
+<Header>
+    <BasicSearchInput GetResultsAsync="GetTrackData"></BasicSearchInput>
+    @if(showGraph)
+    {
+        <button @onclick="ToggleShowGraph" class="inline-flex items-center mx-1 focus:outline-none bg-blue-300 hover:bg-blue-100 py-2 px-2 rounded-sm shadow-md text-blue-900 font-sans">
+            Show Search Results
+        </button>
+    }
+    @if(!showGraph && resultEntries.Count > 0)
+    {
+        <button @onclick="ToggleShowGraph" class="inline-flex items-center mx-1 focus:outline-none bg-blue-300 hover:bg-blue-100 py-2 px-2 rounded-sm shadow-md text-blue-900 font-sans">
+            Show Graph
+        </button>
+    }
+</Header>
+@if (resultEntries.Count > 0)
+{
+    <div class="flex-1 overflow-y-auto p-5">
+        @if (!showGraph)
+        {
+            <CardGrid TItem=TrackData Data=resultEntries EnableOnHover=true>
+                <CardContent Context="cardContext">
+                    @if (!string.IsNullOrEmpty(cardContext.ArtworkUrl100))
+                    {
+                        <img loading="lazy" class="w-32 h-32 flex-shrink-0 top-0 oi-align-left" src=@cardContext.ArtworkUrl100 alt="album art for @cardContext.CollectionName"/>
+                    }
+                    @if (!string.IsNullOrEmpty(cardContext.PreviewUrl))
+                    {
+                        <AudioPlayer AudioUrl=@cardContext.PreviewUrl ElementId=@cardContext.TrackId.ToString() 
+                    PlayStateChanged="SetPlayingTrack" OnVolumeChanged="RerfreshVolume">
+                        </AudioPlayer>
+                    }
+                    <div class="w-500 h-100">
+                    <h3 class="font-bold text-xl mb-2"> @cardContext.TrackName </h3>
+                    <span class="font-bold">By:</span> @cardContext.ArtistName
+                    <br>
+                    <span class="font-bold">Album:</span> @cardContext.CollectionName
+                    <br>
+                    <span class="font-bold">Released:</span> @cardContext.ReleaseDate.ToString("MM-dd-yyyy")
+                    <br>
+                    <span class="font-bold">Genre:</span> @cardContext.PrimaryGenreName
+                </div>
+                </CardContent>
+            </CardGrid>
+        }
+        @if(showGraph)
+        {
+                <Histogram ElementId="TrackData" GraphLabel="Release Dates by Arist" 
+                Data="@resultEntries" DataSetRequested="@requestedDataSet"></Histogram>
+        }
+    </div>
+}
+else
+{
+<div class="grid h-screen place-items-center overflow-y-auto text-center">
+    <div class="p-8 bg-blue-50 rounded-lg shadow">
+      <h1 class="text-6xl text-blue-700">
+        There are no results to display.
+        <br>
+        Please search for a song or artist.
+      </h1>
+    </div>
+  </div>
+}
+<Footer>
+    @if (!showGraph)
+    {
+        @if (currentTrackData != null)
+        {
+            <p>
+                @currentTrackData.TrackName -by- @currentTrackData.ArtistName
+            </p>
+        }
+        <AudioPlayer AudioUrl=@currentTrackUrl ElementId="PagePlayer" PlayStatusDispaly=@currentPlayStatus
+        DisablePlay=pagePlayerDisabled PagePlayer=true PlayStateChanged="SetPlayingTrack" OnVolumeChanged="RerfreshVolume">
+        </AudioPlayer>
+        <VolumeSlider></VolumeSlider>
+    }
+    @if (showGraph)
+    {
+        <select class="inline-flex items-center mx-1 focus:outline-none bg-blue-300 hover:bg-blue-100 py-2 px-2 rounded-sm shadow-md text-blue-900 font-sans" 
+        @onchange="OnDataSetChange" title="Data Set Selection">  
+            <option value="artist" selected>artist</option>
+            <option value="year">year</option>
+        </select>
+        <CSVExportPrompt Data="@resultEntries"></CSVExportPrompt>
+    }
+</Footer>
+
