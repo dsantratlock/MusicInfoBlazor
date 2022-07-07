@@ -27,15 +27,15 @@
                 <CardContent Context="cardContext">
                     @if (!string.IsNullOrEmpty(cardContext.ArtworkUrl100))
                     {
-                        <img loading="lazy" class="w-32 h-32 flex-shrink-0 top-0 oi-align-left" src=@cardContext.ArtworkUrl100 alt="album art for @cardContext.CollectionName"/>
+                        <img loading="lazy" class="w-32 h-32 mx-auto" src=@cardContext.ArtworkUrl100 alt="album art for @cardContext.CollectionName"/>
                     }
                     @if (!string.IsNullOrEmpty(cardContext.PreviewUrl))
                     {
                         <AudioPlayer AudioUrl=@cardContext.PreviewUrl ElementId=@cardContext.TrackId.ToString() 
-                    PlayStateChanged="SetPlayingTrack" OnVolumeChanged="RerfreshVolume">
+                        PlayStateChanged="SetPlayingTrack" OnVolumeChanged="RerfreshVolume">
                         </AudioPlayer>
                     }
-                    <div class="w-500 h-100">
+                <div class="w-500 h-100">
                     <h3 class="font-bold text-xl mb-2"> @cardContext.TrackName </h3>
                     <span class="font-bold">By:</span> @cardContext.ArtistName
                     <br>

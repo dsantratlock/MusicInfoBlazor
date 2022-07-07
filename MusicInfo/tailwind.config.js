@@ -1,5 +1,8 @@
 module.exports = {
-    content: ["./**/**/*.{razor,html,cshtml}"],
+    purge: {
+        enabled: true,
+        content: ["./**/**/*.{razor,html,cshtml}"]
+    },
   theme: {
       extend: {
           keyframes: {

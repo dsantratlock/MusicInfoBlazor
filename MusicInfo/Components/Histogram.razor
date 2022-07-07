@@ -1,7 +1,7 @@
 ﻿@using MusicInfo.Models
 @inject IJSRuntime JSRuntime
  
-<canvas id="@ElementId"></canvas>
+<canvas id="@ElementId" class="p-50 bg-blue-50 rounded-lg shadow text-center"></canvas>
  
 @code {
 
@@ -34,7 +34,7 @@
         {
             Type = "bar",
             Options = new {
-                Responsive = false,
+                Responsive = true,
                 Scales = new {
                     y = new {
                         Ticks = new {
